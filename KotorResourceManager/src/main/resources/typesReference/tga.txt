@@ -1,0 +1,1 @@
+Truevision TGA, often referred to as TARGA, is a raster graphics file format. In KOTOR usually describes lightmaps. Can be converted to PNG.

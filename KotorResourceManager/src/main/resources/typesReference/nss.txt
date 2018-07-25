@@ -1,0 +1,1 @@
+NWNScript source code. After compilation it becomes NCS file. Not used in game directly.

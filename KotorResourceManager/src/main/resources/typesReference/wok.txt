@@ -1,0 +1,1 @@
+File that contains info about the walkmesh in module

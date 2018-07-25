@@ -1,0 +1,11 @@
+GFF file that describes dynamic objects in module's area:
+    * Area properties
+    * Camera list
+    * Creature list
+    * Door list
+    * Encounter list
+    * Placeable list
+    * Sound list
+    * Store list
+    * Trigger list
+    * Waypoints list

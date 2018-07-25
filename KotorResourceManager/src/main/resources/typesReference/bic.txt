@@ -1,0 +1,1 @@
+Vault info specific to player characters. Not used in KOTOR.

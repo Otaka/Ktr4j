@@ -1,0 +1,1 @@
+The .mdl file extension is used to indicate models for every object that can be seen within the game. This includes creatures, items (when lying on the ground), placeables, doors, tiles, and even visual effects.

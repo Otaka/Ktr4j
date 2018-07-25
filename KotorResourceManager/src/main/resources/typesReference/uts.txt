@@ -1,0 +1,1 @@
+GFF file that describes some preconfigured sound. For example it sets REPEATED or ONCE property, or PLAY_ORDER:sequential or random, or ingame volume.

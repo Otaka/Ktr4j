@@ -1,0 +1,1 @@
+File that is created by script compiler. Contains some information retrieved by compiler from script. Not used by game.

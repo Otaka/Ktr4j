@@ -1,0 +1,1 @@
+Gff file that contains information about static objects in module area

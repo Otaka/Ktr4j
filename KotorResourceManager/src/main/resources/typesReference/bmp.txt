@@ -1,0 +1,1 @@
+The BMP file format, also known as bitmap image file or device independent bitmap (DIB) file format or simply a bitmap, is a raster graphics image file format used to store bitmap digital images. Can be converted to PNG.

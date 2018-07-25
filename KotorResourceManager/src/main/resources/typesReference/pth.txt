@@ -1,0 +1,1 @@
+GFF file that contains information about route of npc. It contains information about points and connections between them

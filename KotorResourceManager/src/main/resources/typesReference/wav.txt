@@ -1,0 +1,1 @@
+Waveform Audio File Format. Is a Microsoft and IBM audio file format standard for storing an audio bitstream on PCs.

@@ -1,0 +1,5 @@
+Gff file that contains some information about the module:
+    * Module entry area
+    * Module name
+    * Module event scripts
+    * Module areas list

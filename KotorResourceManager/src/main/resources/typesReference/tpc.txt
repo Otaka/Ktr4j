@@ -1,0 +1,1 @@
+Packed texture. Can be decompressed to PNG.

@@ -1,0 +1,1 @@
+Additional information about texture. Contains information about alpha blending, bumpmapping and other.

@@ -1,0 +1,1 @@
+Gff file that contains blueprint info about the trigger. For example it describe what script to execute in case if player enters in some area(trigger volume)

@@ -1,0 +1,1 @@
+Compiled NWNScript. Contains bytecode of some highlevel game logic. Can be decompiled to bytecode assembly(*.ncs.decompiled)

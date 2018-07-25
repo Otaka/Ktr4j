@@ -1,0 +1,8 @@
+Sound files related to specific voices and creature sounds. It describes:
+    * Battlecry 1-6
+    * Select 1-3
+    * Attack Grunt 1-3
+    * Pain Grunt 1-2
+    * Low health
+    * Death
+    ...

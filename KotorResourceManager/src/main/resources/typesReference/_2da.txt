@@ -1,0 +1,1 @@
+Two dimensional array of arbitrary information that can be read from game itself, or from NWNscript
