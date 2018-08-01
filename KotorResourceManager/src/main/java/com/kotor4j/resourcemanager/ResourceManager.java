@@ -46,6 +46,7 @@ import com.kotor4j.resourcemanager.gff.filetypes.UtsGff;
 import com.kotor4j.resourcemanager.gff.filetypes.UttGff;
 import com.kotor4j.resourcemanager.gff.filetypes.UtwGff;
 import com.kotor4j.resourcemanager.gff.filetypes.WokGff;
+import com.kotor4j.resourcemanager.mdl.MdlAscii;
 
 import com.kotor4j.resourcemanager.rim.FileReaderRim;
 import com.kotor4j.resourcemanager.rim.Rim;
@@ -68,6 +69,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -88,6 +90,7 @@ public class ResourceManager {
     private static final Logger logger = LoggerFactory.getLogger(ResourceManager.class.getName());
     private Configuration configuration;
     protected File gameFolder;
+    protected File convertedMdlsFolder;
     protected Map<String, ResourceType2ResourceListPair> fileToResourceMap = new HashMap<>();
     protected Map<String, ResourceType> extensionToResourceTypeMap = new HashMap<>();
     private ChitinKey chitinKey;
@@ -99,6 +102,7 @@ public class ResourceManager {
     public ResourceManager(Configuration configuration) {
         this.configuration = configuration;
         gameFolder = configuration.getFolder("game.folder");
+        convertedMdlsFolder = configuration.getFolder("game.converted.mdl");
         configuration.loadSwKotorIni(new File(gameFolder, "swkotor.ini"));
         for (ResourceType rt : ResourceType.values()) {
             extensionToResourceTypeMap.put(rt.getExtension().toLowerCase(), rt);
@@ -360,8 +364,11 @@ public class ResourceManager {
     }
 
     public Object getConvertedResource(ResourceRef resourceRef, boolean mdlAsText) throws IOException {
-        NwnByteArrayInputStream rawStream = getRawStream(resourceRef);
+        NwnByteArrayInputStream rawStream = null;
         ContentType contentType = resourceRef.getResourceType().getContentType();
+        if (contentType != ContentType.MDL_MODEL) {
+            rawStream = getRawStream(resourceRef);
+        }
 
         switch (contentType) {
             case TPC_TEXTURE:
@@ -423,7 +430,15 @@ public class ResourceManager {
                 FileReaderSsf fileReaderSsf = new FileReaderSsf();
                 return fileReaderSsf.loadFile(rawStream, resourceRef.getName(), cachedTlkFile);
             case MDL_MODEL:
-                
+                File convertedMdlFile = new File(convertedMdlsFolder, resourceRef.getName() + "-mdledit.mdl.ascii");
+                if (!convertedMdlFile.exists()) {
+                    throw new IllegalStateException("Cannot find converted ascii.mdl for model [" + resourceRef.getName() + "]");
+                }
+
+                try (InputStream stream = new FileInputStream(convertedMdlFile)) {
+                    MdlAscii mdlAscii = new MdlAscii(IOUtils.toString(stream, StandardCharsets.UTF_8));
+                    return mdlAscii;
+                }
             default:
                 throw new IllegalArgumentException("getResource for resource type [" + resourceRef.getResourceType() + "] is not implemented yet");
         }

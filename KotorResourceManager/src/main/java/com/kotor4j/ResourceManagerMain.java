@@ -13,6 +13,7 @@ import com.kotor4j.resourcemanager.chitinkey.ResourceType;
 import com.kotor4j.resourcemanager.dialog.Tlk;
 import com.kotor4j.resourcemanager.gff.GffToJsonConverter;
 import com.kotor4j.resourcemanager.gff.filetypes.AbstractGffResource;
+import com.kotor4j.resourcemanager.mdl.MdlAscii;
 import com.kotor4j.resourcemanager.ssf.SsfFile;
 import com.kotor4j.resourcemanager.vis.VisFile;
 import com.kotor4j.resourcemanager.walkmesh.Walkmesh;
@@ -79,7 +80,7 @@ public class ResourceManagerMain {
             throw new IllegalArgumentException("Please provide --path where you will specify what resources you want to extract");
         }
 
-        ResourcesCollection resources = null;
+        ResourcesCollection resources;
         if (path != null) {
             resources = resourceManager.getResourcesByPath(path);
             logger.info("Found " + resources.collectedResources().size() + " resources from provided path " + path);
@@ -161,7 +162,7 @@ public class ResourceManagerMain {
                 NwnByteArrayInputStream stream = resourceManager.getRawStream(r);
                 FileUtils.writeByteArrayToFile(destinationFile, stream.getBuffer());
             } else if (convert == true) {
-                Object resource = resourceManager.getConvertedResource(r,true);
+                Object resource = resourceManager.getConvertedResource(r, true);
                 if (resource == null) {
                     throw new RuntimeException("Cannot convert file [" + r.toString() + "]");
                 }
@@ -190,6 +191,8 @@ public class ResourceManagerMain {
                     writeFile(destinationFile, (NwnByteArrayInputStream) resource);
                 } else if (resource instanceof SsfFile) {
                     writeFile(destinationFile, ((SsfFile) resource).toJson());
+                } else if (resource instanceof MdlAscii) {
+                    writeFile(destinationFile, ((MdlAscii) resource).getAsciiText());
                 } else {
                     throw new IllegalStateException("Converting object [" + resource.getClass().getSimpleName() + "] is not implemented yet");
                 }
@@ -253,7 +256,7 @@ public class ResourceManagerMain {
             System.out.println(" -Print all found bundles in scanned resources");
             System.out.println("  java -jar " + jar + " --printbundles");
             System.out.println("");
-            System.out.println(" -Extract and convert resources. Extract only from biff bundle file with .mdl and nss extension, and ignore scanning swpc_tex_tpb and swpc_tex_tpc bundles(just for example)");
+            System.out.println(" -Extract and convert resources. Extract only from biff bundle file with .mdl and nss extension, and ignore scanning swpc_tex_tpb and swpc_tex_tpc bundles (just for example)");
             System.out.println(" (Application will try to convert some resources to more user friendly formats(tpc -> png, ncs -> disassembled_ncs...))");
             System.out.println("  java -jar " + jar + " --path \"gameres://+[biff/*.mdl, biff/*.nss] -[swpc_tex_tpb/*,swpc_tex_tpc/*]\" --convert --dest \"D:/KOTOR_extracted\"");
             System.exit(0);
