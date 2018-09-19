@@ -9,6 +9,7 @@
         <module>KotorCommons</module>
         <module>KotorNcsInterpeter</module>
         <module>KotorResourceManager</module>
+        <module>Ktr4j</module>
     </modules>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

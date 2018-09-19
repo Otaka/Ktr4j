@@ -98,15 +98,30 @@ public class ResourceManager {
     protected static final String GAMERES_PREFIX = "gameres://";
     private Tlk cachedTlkFile;
     private NcsAssembler ncsAssembler = new NcsAssembler();
+    private String currentModule;
+    private File modulesFolder;
+    private File rimsFolder;
 
-    public ResourceManager(Configuration configuration) {
-        this.configuration = configuration;
+    public ResourceManager() {
+        this.configuration = new Configuration();
         gameFolder = configuration.getFolder("game.folder");
         convertedMdlsFolder = configuration.getFolder("game.converted.mdl");
         configuration.loadSwKotorIni(new File(gameFolder, "swkotor.ini"));
         for (ResourceType rt : ResourceType.values()) {
             extensionToResourceTypeMap.put(rt.getExtension().toLowerCase(), rt);
         }
+    }
+
+    public Configuration getConfiguration() {
+        return configuration;
+    }
+
+    public static Context loadContext(boolean readAllModules) throws IOException {
+        ResourceManager resourceManager = new ResourceManager();
+        logger.info("Reading resources");
+        resourceManager.scanWholeResourcesList(readAllModules);
+        logger.info("Finished reading resources");
+        return new Context(resourceManager, resourceManager.getConfiguration());
     }
 
     public void closeOpenedFilesCache() {
@@ -122,13 +137,41 @@ public class ResourceManager {
         openedFilesCache.clear();
     }
 
-    public void scanWholeResourcesList() throws IOException {
+    public void scanWholeResourcesList(boolean readAllModules) throws IOException {
         chitinKey = readChitinKeyFile(gameFolder);
+        modulesFolder = configuration.getFile("swkotor.alias.modules");
+        if (!modulesFolder.exists()) {
+            throw new IllegalArgumentException("Cannot find modules folder [" + modulesFolder.getAbsolutePath() + "]");
+        }
+
+        rimsFolder = new File(gameFolder, "rims");
+        if (!rimsFolder.exists()) {
+            throw new IllegalArgumentException("Cannot find rims folder [" + rimsFolder.getAbsolutePath() + "]");
+        }
+
         readBiffs(gameFolder, chitinKey);
         addTlkFile(gameFolder);
         readErf();
-        readModules();
+        if (readAllModules) {
+            readModules();
+        }
         readOverrideFolder();
+    }
+
+    public void setCurrentModule(String moduleName) {
+        currentModule = moduleName;
+        logger.debug("Read header from module " + currentModule + ".rim");
+        File moduleFile = new File(modulesFolder, currentModule + ".rim");
+        if (!moduleFile.exists()) {
+            throw new IllegalArgumentException("Cannot find module file [" + moduleFile.getAbsolutePath() + "]");
+        }
+
+        try (FileInputStream inputStream = new FileInputStream(moduleFile)) {
+            Rim rimArchive = new FileReaderRim().loadFile(inputStream, moduleFile);
+            processParsedRimArchive(rimArchive, "module");
+        } catch (IOException ex) {
+            throw new RuntimeException("Error while parsing module file [" + moduleFile.getAbsolutePath() + "]", ex);
+        }
     }
 
     private void addTlkFile(File gameFolder) {
@@ -240,16 +283,6 @@ public class ResourceManager {
     }
 
     private void readModules() {
-        File modulesFolder = configuration.getFile("swkotor.alias.modules");
-        if (!modulesFolder.exists()) {
-            throw new IllegalArgumentException("Cannot find modules folder [" + modulesFolder.getAbsolutePath() + "]");
-        }
-
-        File rimsFolder = new File(gameFolder, "rims");
-        if (!rimsFolder.exists()) {
-            throw new IllegalArgumentException("Cannot find rims folder [" + rimsFolder.getAbsolutePath() + "]");
-        }
-
         for (File moduleFile : modulesFolder.listFiles((FilenameFilter) new WildcardFileFilter("*.rim"))) {
             logger.debug("Read header from module " + moduleFile.getName());
             try (FileInputStream inputStream = new FileInputStream(moduleFile)) {
@@ -361,6 +394,10 @@ public class ResourceManager {
 
             return new NwnByteArrayInputStream(buffer);
         }
+    }
+
+    public Object getConvertedResource(ResourceRef resourceRef) throws IOException {
+        return getConvertedResource(resourceRef, false);
     }
 
     public Object getConvertedResource(ResourceRef resourceRef, boolean mdlAsText) throws IOException {

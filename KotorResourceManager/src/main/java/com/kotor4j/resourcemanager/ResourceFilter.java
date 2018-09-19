@@ -21,7 +21,7 @@ public class ResourceFilter {
     public ResourceFilter(ResourceManager resourceManager) {
         this.resourceManager = resourceManager;
     }
-
+    
     /**
      * gameres://+[override/*.nss, biff/*.mdl]
      */

@@ -2,8 +2,8 @@ package com.kotor4j;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
-import com.kotor4j.configs.Configuration;
 import com.kotor4j.io.NwnByteArrayInputStream;
+import com.kotor4j.resourcemanager.Context;
 import com.kotor4j.resourcemanager.HelpAboutTypes;
 import com.kotor4j.resourcemanager.ResourceRef;
 import com.kotor4j.resourcemanager.ResourceManager;
@@ -67,13 +67,9 @@ public class ResourceManagerMain {
             printHelpAboutTypes(printHelpAboutTypes);
         }
 
-        Configuration configuration = new Configuration();
-        ResourceManager resourceManager = new ResourceManager(configuration);
-        logger.info("Reading resources");
-        resourceManager.scanWholeResourcesList();
-        logger.info("Finished reading resources");
+        Context context = ResourceManager.loadContext(true);
         if (printBundles) {
-            printBundles(resourceManager);
+            printBundles(context.getResourceManager());
         }
 
         if (destinationFolderPath != null && path == null) {
@@ -82,14 +78,16 @@ public class ResourceManagerMain {
 
         ResourcesCollection resources;
         if (path != null) {
-            resources = resourceManager.getResourcesByPath(path);
+            resources = context.getResourceManager().getResourcesByPath(path);
             logger.info("Found " + resources.collectedResources().size() + " resources from provided path " + path);
             logger.info("Started extraction");
-            processExtraction(resources, resourceManager);
+            processExtraction(resources, context.getResourceManager());
         }
 
         logger.info("Finish");
     }
+
+    
 
     private void processExtraction(ResourcesCollection resourcesCollection, ResourceManager resourceManager) throws IOException {
         List<ResourceRef> resources = resourcesCollection.collectedResources();
