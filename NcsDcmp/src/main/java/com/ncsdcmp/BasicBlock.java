@@ -8,65 +8,94 @@ import java.util.Map;
 /**
  * @author sad
  */
-class BasicBlock {
+public class BasicBlock {
 
-    private List<Line> lines = new ArrayList<>();
+    private int firstInstructionIndex;
     private int enterAddress;
-    private int exitAddress;
+    private int lastInstructionAddress;
+    private int byteLength;
+    private int instructionsCount;
+    private FunctionInfo ownerFunction;
     private List<BasicBlock> referencedFrom = new ArrayList<>();
-    private BasicBlock referencedTo;
-    private int referencedToAddress;
-    private Map<String,Object>metadata=new HashMap<>();
+    private Map<String, Object> metadata = new HashMap<>();
+    private BasicBlock nextBlock;
+    private BasicBlock jumpBlock;
+
+    public void setLastInstructionAddress(int lastInstructionAddress) {
+        this.lastInstructionAddress = lastInstructionAddress;
+    }
+
+    public int getLastInstructionAddress() {
+        return lastInstructionAddress;
+    }
+
+    public void setFirstInstructionIndex(int firstInstructionIndex) {
+        this.firstInstructionIndex = firstInstructionIndex;
+    }
+
+    public int getFirstInstructionIndex() {
+        return firstInstructionIndex;
+    }
+
+    public void setJumpBlock(BasicBlock jumpBlock) {
+        this.jumpBlock = jumpBlock;
+    }
+
+    public void setNextBlock(BasicBlock nextBlock) {
+        this.nextBlock = nextBlock;
+    }
+
+    public BasicBlock getJumpBlock() {
+        return jumpBlock;
+    }
+
+    public BasicBlock getNextBlock() {
+        return nextBlock;
+    }
+
+    public FunctionInfo getOwnerFunction() {
+        return ownerFunction;
+    }
+
+    public void setOwnerFunction(FunctionInfo ownerFunction) {
+        this.ownerFunction = ownerFunction;
+    }
+
+    public void setInstructionsCount(int instructionsCount) {
+        this.instructionsCount = instructionsCount;
+    }
+
+    public int getInstructionsCount() {
+        return instructionsCount;
+    }
 
     public Map<String, Object> getMetadata() {
         return metadata;
-    }
-    
-    
-
-    public void setReferencedToAddress(int referencedToAddress) {
-        this.referencedToAddress = referencedToAddress;
-    }
-
-    public int getReferencedToAddress() {
-        return referencedToAddress;
     }
 
     public void setEnterAddress(int enterAddress) {
         this.enterAddress = enterAddress;
     }
 
-    public void setExitAddress(int exitAddress) {
-        this.exitAddress = exitAddress;
-    }
-
-    public int getExitAddress() {
-        return exitAddress;
-    }
-
-    public List<Line> getLines() {
-        return lines;
-    }
-
     public List<BasicBlock> getReferencedFrom() {
         return referencedFrom;
-    }
-
-    public BasicBlock getReferencedTo() {
-        return referencedTo;
     }
 
     public int getEnterAddress() {
         return enterAddress;
     }
 
-    public void setReferencedTo(BasicBlock referencedTo) {
-        this.referencedTo = referencedTo;
+    public void setByteLength(int byteLength) {
+        this.byteLength = byteLength;
+    }
+
+    public int getByteLength() {
+        return byteLength;
     }
 
     @Override
     public String toString() {
-        return Integer.toHexString(enterAddress)+":"+Integer.toHexString(exitAddress)+"["+lines.size()+" commands]";
+        return Integer.toHexString(enterAddress) + ":" + Integer.toHexString(lastInstructionAddress);
     }
 
 }
