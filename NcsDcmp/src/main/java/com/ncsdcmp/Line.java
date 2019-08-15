@@ -5,11 +5,29 @@ import java.util.Arrays;
 /**
  * @author sad
  */
-class Line {
+public class Line {
 
     private int address;
     private String opcode;
     private Object[] args;
+    private BasicBlock basicBlock;
+    private int instructionBytesLength;
+
+    public void setInstructionBytesLength(int instructionBytesLength) {
+        this.instructionBytesLength = instructionBytesLength;
+    }
+
+    public int getInstructionBytesLength() {
+        return instructionBytesLength;
+    }
+
+    public void setBasicBlock(BasicBlock basicBlock) {
+        this.basicBlock = basicBlock;
+    }
+
+    public BasicBlock getBasicBlock() {
+        return basicBlock;
+    }
 
     public int getAddress() {
         return address;

@@ -3,12 +3,30 @@ package com.ncsdcmp;
 /**
  * @author sad
  */
-class FunctionInfo {
+public class FunctionInfo {
 
     private int address;
+    private int length;
+    private BasicBlock rootBasicBlock;
+
+    public void setRootBasicBlock(BasicBlock rootBasicBlock) {
+        this.rootBasicBlock = rootBasicBlock;
+    }
+
+    public BasicBlock getRootBasicBlock() {
+        return rootBasicBlock;
+    }
 
     public FunctionInfo(int address) {
         this.address = address;
+    }
+
+    public void setLength(int length) {
+        this.length = length;
+    }
+
+    public int getLength() {
+        return length;
     }
 
     public int getAddress() {
@@ -38,6 +56,11 @@ class FunctionInfo {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public String toString() {
+        return "Function "+Integer.toHexString(address)+":"+Integer.toHexString(address+length);
     }
 
 }
