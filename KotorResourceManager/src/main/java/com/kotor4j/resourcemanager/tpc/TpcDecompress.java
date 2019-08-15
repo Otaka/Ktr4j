@@ -16,24 +16,30 @@ public class TpcDecompress {
         }
 
         for (TpcMipMap mipMap : texture.getMipMaps()) {
-            if (texture.getFormat() == TpcPixelFormat.RGB) {
-                convertFromRGB2RGBA(mipMap);
-                texture.setDataType(PixelDataType.PixelDataType8);
-                texture.setFormat(TpcPixelFormat.RGBA);
-                texture.setRawFormat(TpcPixelFormatRaw.RGBA8);
-                texture.setMinDataSize(4);
-            } else if (texture.getFormat() == TpcPixelFormat.BGR) {
-                convertFromBgr2RGBA(mipMap);
-                texture.setDataType(PixelDataType.PixelDataType8);
-                texture.setFormat(TpcPixelFormat.RGBA);
-                texture.setRawFormat(TpcPixelFormatRaw.RGBA8);
-                texture.setMinDataSize(4);
-            } else if (texture.getFormat() == TpcPixelFormat.GRAY) {
-                convertFromGRAY2RGBA(mipMap);
-                texture.setDataType(PixelDataType.PixelDataType8);
-                texture.setFormat(TpcPixelFormat.RGBA);
-                texture.setRawFormat(TpcPixelFormatRaw.RGBA8);
-                texture.setMinDataSize(4);
+            if (null != texture.getFormat()) switch (texture.getFormat()) {
+                case RGB:
+                    convertFromRGB2RGBA(mipMap);
+                    texture.setDataType(PixelDataType.PixelDataType8);
+                    texture.setFormat(TpcPixelFormat.RGBA);
+                    texture.setRawFormat(TpcPixelFormatRaw.RGBA8);
+                    texture.setMinDataSize(4);
+                    break;
+                case BGR:
+                    convertFromBgr2RGBA(mipMap);
+                    texture.setDataType(PixelDataType.PixelDataType8);
+                    texture.setFormat(TpcPixelFormat.RGBA);
+                    texture.setRawFormat(TpcPixelFormatRaw.RGBA8);
+                    texture.setMinDataSize(4);
+                    break;
+                case GRAY:
+                    convertFromGRAY2RGBA(mipMap);
+                    texture.setDataType(PixelDataType.PixelDataType8);
+                    texture.setFormat(TpcPixelFormat.RGBA);
+                    texture.setRawFormat(TpcPixelFormatRaw.RGBA8);
+                    texture.setMinDataSize(4);
+                    break;
+                default:
+                    break;
             }
         }
     }
@@ -121,19 +127,22 @@ public class TpcDecompress {
             /* The DXT algorithms work on 4x4 pixel blocks. Textures smaller than one
              * block will be padded, but larger textures need to be correctly aligned. */
             byte[] result;
-            if (texture.getRawFormat() == TpcPixelFormatRaw.DXT1) {
-                result = decompressDxt1(texture, src);
-                mipMap.setData(result);
-                mipMap.setSize(mipMap.getWidth() * mipMap.getHeight() * 4);
-            } else if (texture.getRawFormat() == TpcPixelFormatRaw.DXT5) {
-                result = decompressDxt5(texture, src);
-                mipMap.setData(result);
-                mipMap.setSize(mipMap.getWidth() * mipMap.getHeight() * 4);
-                verticalMirror(mipMap, 4);
-            } else if (texture.getRawFormat() == TpcPixelFormatRaw.DXT3) {
-                throw new RuntimeException("DXT3 uncompression is not implemented yet");
-            } else {
-                throw new RuntimeException("Unknown compression");
+            if (null != texture.getRawFormat()) switch (texture.getRawFormat()) {
+                case DXT1:
+                    result = decompressDxt1(texture, src);
+                    mipMap.setData(result);
+                    mipMap.setSize(mipMap.getWidth() * mipMap.getHeight() * 4);
+                    break;
+                case DXT5:
+                    result = decompressDxt5(texture, src);
+                    mipMap.setData(result);
+                    mipMap.setSize(mipMap.getWidth() * mipMap.getHeight() * 4);
+                    verticalMirror(mipMap, 4);
+                    break;
+                case DXT3:
+                    throw new RuntimeException("DXT3 uncompression is not implemented yet");
+                default:
+                    throw new RuntimeException("Unknown compression");
             }
 
         }

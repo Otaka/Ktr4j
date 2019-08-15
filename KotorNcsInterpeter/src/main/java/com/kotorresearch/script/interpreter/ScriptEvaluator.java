@@ -176,59 +176,62 @@ public class ScriptEvaluator {
                 case EQUAL:///////////////////////////////
                 case NEQUAL:////////////////////////////
                     type = getByteFromByteBuffer(buffer, ip++);
-                    if(type==0x32){
-                        //comparing locations
-                        //expectes two handles(2 ints)
-                        throw new IllegalArgumentException("NEQUAL and EQUAL of locations is not implemented yet");
-                    }else if (type == 0x24) {/////////////////////////
-                        //compare structures
-
-                        int sizeOfStructure = getShortFromByteBuffer(buffer, ip);
-                        ip += 2;
-                        int structure1Offset = sp - sizeOfStructure;
-                        int structure2Offset = sp - (sizeOfStructure * 2);
-                        sp -= sizeOfStructure * 2;
-                        result = 1;
-                        for (int i = 0; i < sizeOfStructure; i++) {
-                            if (stack[structure1Offset + i] != stack[structure2Offset + i]) {
-                                result = 0;
-                                break;
-                            }
+            switch (type) {
+                case 0x32:
+                    //comparing locations
+                    //expectes two handles(2 ints)
+                    throw new IllegalArgumentException("NEQUAL and EQUAL of locations is not implemented yet");
+                case 0x24:
+                    /////////////////////////
+                    //compare structures
+                    
+                    int sizeOfStructure = getShortFromByteBuffer(buffer, ip);
+                    ip += 2;
+                    int structure1Offset = sp - sizeOfStructure;
+                    int structure2Offset = sp - (sizeOfStructure * 2);
+                    sp -= sizeOfStructure * 2;
+                    result = 1;
+                    for (int i = 0; i < sizeOfStructure; i++) {
+                        if (stack[structure1Offset + i] != stack[structure2Offset + i]) {
+                            result = 0;
+                            break;
                         }
-
-                        if (opcode == NEQUAL) {
-                            result = result == 0 ? 1 : 0;
-                        }
-                        putIntToByteBuffer(stack, result, sp);
-                        sp += 4;
-                    } else {//////////////////////////////////////////
-                        value2 = getIntFromByteBuffer(stack, sp - 4);
-                        value1 = getIntFromByteBuffer(stack, sp - 8);
-                        switch (type) {
-                            case 0x23://test string equality
-                                //first check string indexes, if they are equal, then objects equal, in other case check string equality
-                                if (value1 == value2) {
-                                    result = 1;//////////////////////////////////////////
-                                } else {
-                                    String s1 = stringsPool.get(value1);
-                                    String s2 = stringsPool.get(value2);
-                                    result = s1.equals(s2) ? 1 : 0;/////////////////////////////
-                                }
-                                break;
-                            default:
-                                //EQUALII //////////////////////////////////////////////
-                                //EQUALFF ///////////////////
-                                //EQUALOO (by handles)///////////////////
-                                result = value1 == value2 ? 1 : 0;
-                                break;
-                        }
-
-                        if (opcode == NEQUAL) {
-                            result = result == 0 ? 1 : 0;
-                        }
-                        putIntToByteBuffer(stack, result, sp - 8);
-                        sp -= 4;
                     }
+                    if (opcode == NEQUAL) {
+                        result = result == 0 ? 1 : 0;
+                    }
+                    putIntToByteBuffer(stack, result, sp);
+                    sp += 4;
+                    break;
+                default:
+                    //////////////////////////////////////////
+                    value2 = getIntFromByteBuffer(stack, sp - 4);
+                    value1 = getIntFromByteBuffer(stack, sp - 8);
+                    switch (type) {
+                        case 0x23://test string equality
+                            //first check string indexes, if they are equal, then objects equal, in other case check string equality
+                            if (value1 == value2) {
+                                result = 1;//////////////////////////////////////////
+                            } else {
+                                String s1 = stringsPool.get(value1);
+                                String s2 = stringsPool.get(value2);
+                                result = s1.equals(s2) ? 1 : 0;/////////////////////////////
+                            }
+                            break;
+                        default:
+                            //EQUALII //////////////////////////////////////////////
+                            //EQUALFF ///////////////////
+                            //EQUALOO (by handles)///////////////////
+                            result = value1 == value2 ? 1 : 0;
+                            break;
+                    }
+                    if (opcode == NEQUAL) {
+                        result = result == 0 ? 1 : 0;
+                    }
+                    putIntToByteBuffer(stack, result, sp - 8);
+                    sp -= 4;
+                    break;
+            }
                     break;
                 case GEQ:///////////////
                 case GT:////////////////
@@ -238,41 +241,46 @@ public class ScriptEvaluator {
                     value2 = getIntFromByteBuffer(stack, sp - 4);
                     value1 = getIntFromByteBuffer(stack, sp - 8);
                     result = 0;
-                    if (type == 0x20) {//Integer-Integer
-                        switch (opcode) {
-                            case GEQ:
-                                result = value1 >= value2 ? 1 : 0;
-                                break;
-                            case GT:
-                                result = value1 > value2 ? 1 : 0;
-                                break;
-                            case LT:
-                                result = value1 < value2 ? 1 : 0;
-                                break;
-                            case LEQ:
-                                result = value1 <= value2 ? 1 : 0;
-                                break;
-                        }
-                    } else if (type == 0x21) {//Float-Float   ////////////////////////
-                        float f1 = Float.intBitsToFloat(value1);
-                        float f2 = Float.intBitsToFloat(value2);
-                        switch (opcode) {
-                            case GEQ:
-                                result = f1 >= f2 ? 1 : 0;
-                                break;
-                            case GT:
-                                result = f1 > f2 ? 1 : 0;
-                                break;
-                            case LT:
-                                result = f1 < f2 ? 1 : 0;
-                                break;
-                            case LEQ:
-                                result = f1 <= f2 ? 1 : 0;
-                                break;
-                        }
-                    } else {
-                        throw new RuntimeException("Comparing opcode expect only type equal to 0x20 or 0x21, but received [" + ByteArrayUtils.hex(type, 1) + "]. It is bug");
+            switch (type) {
+                case 0x20:
+                    //Integer-Integer
+                    switch (opcode) {
+                        case GEQ:
+                            result = value1 >= value2 ? 1 : 0;
+                            break;
+                        case GT:
+                            result = value1 > value2 ? 1 : 0;
+                            break;
+                        case LT:
+                            result = value1 < value2 ? 1 : 0;
+                            break;
+                        case LEQ:
+                            result = value1 <= value2 ? 1 : 0;
+                            break;
                     }
+                    break;
+                case 0x21:
+                    //Float-Float   ////////////////////////
+                    float f1 = Float.intBitsToFloat(value1);
+                    float f2 = Float.intBitsToFloat(value2);
+                    switch (opcode) {
+                        case GEQ:
+                            result = f1 >= f2 ? 1 : 0;
+                            break;
+                        case GT:
+                            result = f1 > f2 ? 1 : 0;
+                            break;
+                        case LT:
+                            result = f1 < f2 ? 1 : 0;
+                            break;
+                        case LEQ:
+                            result = f1 <= f2 ? 1 : 0;
+                            break;
+                    }
+                    break;
+                default:
+                    throw new RuntimeException("Comparing opcode expect only type equal to 0x20 or 0x21, but received [" + ByteArrayUtils.hex(type, 1) + "]. It is bug");
+            }
 
                     putIntToByteBuffer(stack, result, sp - 8);
                     sp -= 4;
@@ -320,25 +328,30 @@ public class ScriptEvaluator {
                     value1 = getIntFromByteBuffer(stack, sp - 8);
                     result = 0;
                     boolean genericSaveResult = true;
-                    if (type == 0x20) {//INTEGER-INTEGER
-                        switch (opcode) {
-                            case ADD:
-                                result = value1 + value2;////////////
-                                break;
-                            case SUB:
-                                result = value1 - value2;////////////
-                                break;
-                            case DIV:
-                                result = value1 / value2;////////////
-                                break;
-                            case MUL:
-                                result = value1 * value2;/////////////
-                                break;
-                            case MODII:
-                                result = value1 % value2;///////////////
-                                break;
-                        }
-                    } else if (type == 0x25) {//INTEGER-FLOAT  ////////////////
+            switch (type) {
+                case 0x20:
+                    //INTEGER-INTEGER
+                    switch (opcode) {
+                        case ADD:
+                            result = value1 + value2;////////////
+                            break;
+                        case SUB:
+                            result = value1 - value2;////////////
+                            break;
+                        case DIV:
+                            result = value1 / value2;////////////
+                            break;
+                        case MUL:
+                            result = value1 * value2;/////////////
+                            break;
+                        case MODII:
+                            result = value1 % value2;///////////////
+                            break;
+                    }
+                    break;
+                case 0x25:
+                    {
+                        //INTEGER-FLOAT  ////////////////
                         float f2 = Float.intBitsToFloat(value2);
                         switch (opcode) {
                             case ADD:
@@ -354,7 +367,11 @@ public class ScriptEvaluator {
                                 result = Float.floatToIntBits(value1 * f2);//////
                                 break;
                         }
-                    } else if (type == 0x26) {//FLOAT-INTEGER /////////
+                        break;
+                    }
+                case 0x26:
+                    {
+                        //FLOAT-INTEGER /////////
                         float f1 = Float.intBitsToFloat(value1);
                         switch (opcode) {
                             case ADD:
@@ -370,7 +387,11 @@ public class ScriptEvaluator {
                                 result = Float.floatToIntBits(f1 * value2);////////////
                                 break;
                         }
-                    } else if (type == 0x21) {//FLOAT-FLOAT
+                        break;
+                    }
+                case 0x21:
+                    {
+                        //FLOAT-FLOAT
                         float f1 = Float.intBitsToFloat(value1);
                         float f2 = Float.intBitsToFloat(value2);
                         switch (opcode) {
@@ -387,59 +408,62 @@ public class ScriptEvaluator {
                                 result = Float.floatToIntBits(f1 * f2);//////////////
                                 break;
                         }
-                    } else if (type == 0x23) {//ADD STRING-STRING
-                        if (opcode != ADD) {
-                            throw new IllegalArgumentException("You can do STRING-STRING only with add, but found [" + ByteArrayUtils.hex(type, 1) + "]");
-                        }
-
-                        String v1 = stringsPool.get(value1);/////////////////////////
-                        String v2 = stringsPool.get(value2);/////////////////////////
-                        String resultString = v1 + v2;///////////////////////////////
-                        result = putStringToPool(resultString);
-                    } else if (type == 0x3A) {//ADD or SUB VECTORS///////////////////////////////////
-                        //dumpStack();
-                        sp -= 4;
-                        float v2z = Float.intBitsToFloat(getIntFromByteBuffer(stack, sp));
-                        sp -= 4;
-                        float v2y = Float.intBitsToFloat(getIntFromByteBuffer(stack, sp));
-                        sp -= 4;
-                        float v2x = Float.intBitsToFloat(getIntFromByteBuffer(stack, sp));
-                        sp -= 4;
-                        float v1z = Float.intBitsToFloat(getIntFromByteBuffer(stack, sp));
-                        sp -= 4;
-                        float v1y = Float.intBitsToFloat(getIntFromByteBuffer(stack, sp));
-                        sp -= 4;
-                        float v1x = Float.intBitsToFloat(getIntFromByteBuffer(stack, sp));
-
-                        if (opcode == ADD) {
-                            v1x = v1x + v2x;
-                            v1y = v1y + v2y;
-                            v1z = v1z + v2z;
-                        } else if (opcode == SUB) {
-                            v1x = v1x - v2x;
-                            v1y = v1y - v2y;
-                            v1z = v1z - v2z;
-                        }
-
-                        putIntToByteBuffer(stack, Float.floatToIntBits(v1x), sp);
-                        sp += 4;
-                        putIntToByteBuffer(stack, Float.floatToIntBits(v1y), sp);
-                        sp += 4;
-                        putIntToByteBuffer(stack, Float.floatToIntBits(v1z), sp);
-                        sp += 4;
-                        genericSaveResult = false;
+                        break;
+                    }
+                case 0x23:
+                    //ADD STRING-STRING
+                    if (opcode != ADD) {
+                        throw new IllegalArgumentException("You can do STRING-STRING only with add, but found [" + ByteArrayUtils.hex(type, 1) + "]");
+                    }
+                    String v1 = stringsPool.get(value1);/////////////////////////
+                    String v2 = stringsPool.get(value2);/////////////////////////
+                    String resultString = v1 + v2;///////////////////////////////
+                    result = putStringToPool(resultString);
+                    break;
+                case 0x3A:
+                    //ADD or SUB VECTORS///////////////////////////////////
+                    //dumpStack();
+                    sp -= 4;
+                    float v2z = Float.intBitsToFloat(getIntFromByteBuffer(stack, sp));
+                    sp -= 4;
+                    float v2y = Float.intBitsToFloat(getIntFromByteBuffer(stack, sp));
+                    sp -= 4;
+                    float v2x = Float.intBitsToFloat(getIntFromByteBuffer(stack, sp));
+                    sp -= 4;
+                    float v1z = Float.intBitsToFloat(getIntFromByteBuffer(stack, sp));
+                    sp -= 4;
+                    float v1y = Float.intBitsToFloat(getIntFromByteBuffer(stack, sp));
+                    sp -= 4;
+                    float v1x = Float.intBitsToFloat(getIntFromByteBuffer(stack, sp));
+                    if (opcode == ADD) {
+                        v1x = v1x + v2x;
+                        v1y = v1y + v2y;
+                        v1z = v1z + v2z;
+                    } else if (opcode == SUB) {
+                        v1x = v1x - v2x;
+                        v1y = v1y - v2y;
+                        v1z = v1z - v2z;
+                    }
+                    putIntToByteBuffer(stack, Float.floatToIntBits(v1x), sp);
+                    sp += 4;
+                    putIntToByteBuffer(stack, Float.floatToIntBits(v1y), sp);
+                    sp += 4;
+                    putIntToByteBuffer(stack, Float.floatToIntBits(v1z), sp);
+                    sp += 4;
+                    genericSaveResult = false;
 //dumpStack();
-                    } else if (type == 0x3B) {//MUL or DIV Vector-Float
+                    break;
+                case 0x3B:
+                    {
+                        //MUL or DIV Vector-Float
                         sp -= 4;
                         float fvalue = Float.intBitsToFloat(getIntFromByteBuffer(stack, sp));
-
                         sp -= 4;
                         float vz = Float.intBitsToFloat(getIntFromByteBuffer(stack, sp));
                         sp -= 4;
                         float vy = Float.intBitsToFloat(getIntFromByteBuffer(stack, sp));
                         sp -= 4;
                         float vx = Float.intBitsToFloat(getIntFromByteBuffer(stack, sp));
-
                         if (opcode == MUL) {
                             vx = vx * fvalue;
                             vy = vy * fvalue;
@@ -449,7 +473,6 @@ public class ScriptEvaluator {
                             vy = vy / fvalue;
                             vz = vz / fvalue;
                         }
-
                         putIntToByteBuffer(stack, Float.floatToIntBits(vx), sp);
                         sp += 4;
                         putIntToByteBuffer(stack, Float.floatToIntBits(vy), sp);
@@ -458,21 +481,22 @@ public class ScriptEvaluator {
                         sp += 4;
                         genericSaveResult = false;
                         //dumpStack();
-                    } else if (type == 0x3C) {//MUL Float-Vector
+                        break;
+                    }
+                case 0x3C:
+                    {
+                        //MUL Float-Vector
                         sp -= 4;
                         float vz = Float.intBitsToFloat(getIntFromByteBuffer(stack, sp));
                         sp -= 4;
                         float vy = Float.intBitsToFloat(getIntFromByteBuffer(stack, sp));
                         sp -= 4;
                         float vx = Float.intBitsToFloat(getIntFromByteBuffer(stack, sp));
-
                         sp -= 4;
                         float fvalue = Float.intBitsToFloat(getIntFromByteBuffer(stack, sp));
-
                         vx = vx * fvalue;
                         vy = vy * fvalue;
                         vz = vz * fvalue;
-
                         putIntToByteBuffer(stack, Float.floatToIntBits(vx), sp);
                         sp += 4;
                         putIntToByteBuffer(stack, Float.floatToIntBits(vy), sp);
@@ -481,7 +505,11 @@ public class ScriptEvaluator {
                         sp += 4;
                         genericSaveResult = false;
                         //dumpStack();
+                        break;
                     }
+                default:
+                    break;
+            }
 
                     if (genericSaveResult) {
                         putIntToByteBuffer(stack, result, sp - 8);

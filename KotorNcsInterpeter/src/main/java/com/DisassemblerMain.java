@@ -23,8 +23,13 @@ public class DisassemblerMain {
     private static Set<String> foundActionFunctions = new HashSet<>();
 
     public static void main(String[] args) throws FileNotFoundException, IOException {
-        File scriptFolder = new File("f:\\java\\mydifferentprojects\\NcsInterpeter\\NcsInterpeter\\src\\test\\java\\com\\kotorresearch\\script\\integration\\testsuites\\");
+        File scriptFolder = new File("f:\\java\\Ktr4j\\KotorNcsInterpeter\\src\\test\\java\\com\\kotorresearch\\script\\integration\\testsuites\\");
+       // File scriptFolder = new File("f:\\java\\Ktr4j\\KotorNcsInterpeter\\");
         //File scriptFolder = new File("g:\\kotor_Extracted\\extracted\\bif\\scripts_with_sources\\");
+        if(!scriptFolder.exists()){
+            throw new RuntimeException("Cannot find folder ["+scriptFolder.getAbsolutePath()+"]");
+        }
+        
         for (File f : scriptFolder.listFiles()) {
             if (f.getAbsolutePath().endsWith(".ncs")) {
                 System.out.println("process file " + f.getAbsolutePath() + " " + f.length() + "b");

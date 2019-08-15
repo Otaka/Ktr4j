@@ -1,0 +1,55 @@
+
+f:\java\Ktr4j\KotorNcsInterpeter\src\test\java\com\kotorresearch\script\integration\testsuites>"h:\Games\Games\NWN Diamond\utils\clcompile.exe" *.nss 
+clcompile:  BioWare's Command-Line Compiler
+Copyright (c) 2003, BioWare Corp.
+
+File 1: base_arithm.nss
+File 2: base_arithm2.nss
+File 3: emptyfile.nss
+File 4: floatargs.nss
+File 5: for.nss
+File 6: func_def.nss
+File 7: func_def_2.nss
+File 8: ifs.nss
+File 9: objects.nss
+File 10: save_state.nss
+File 11: save_state_globl.nss
+File 12: strings.nss
+File 13: struct.nss
+File 14: switch.nss
+File 15: vector.nss
+Time To Compile : 0.284 seconds
+base_arithm compiled successfully.
+
+base_arithm2 compiled successfully.
+
+emptyfile compiled successfully.
+
+floatargs compiled successfully.
+
+for compiled successfully.
+
+func_def compiled successfully.
+
+func_def_2 did not compile successfully.
+
+Message:  func_def_2.nss(13): ÎØÈÁÊÀ: ÄÅÊËÀÐÀÖÈß ÍÅ ÑÎÎÒÂÅÒÑÒÂÓÅÒ ÏÀÐÀÌÅÒÐÀÌ
+
+ifs compiled successfully.
+
+objects compiled successfully.
+
+save_state compiled successfully.
+
+save_state_globl compiled successfully.
+
+strings compiled successfully.
+
+struct compiled successfully.
+
+switch compiled successfully.
+
+vector compiled successfully.
+
+
+f:\java\Ktr4j\KotorNcsInterpeter\src\test\java\com\kotorresearch\script\integration\testsuites>del *.ndb 

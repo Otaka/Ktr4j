@@ -23,12 +23,18 @@ public class ByteArrayUtils {
 
     public static String hex(int hex, int typeByteLength) {
         String resultString;
-        if (typeByteLength == 1) {
-            hex = hex & 0xFF;
-        } else if (typeByteLength == 2) {
-            hex = hex & 0xFFFF;
-        } else if (typeByteLength == 4) {
-            hex = hex & 0xFFFFFFFF;
+        switch (typeByteLength) {
+            case 1:
+                hex = hex & 0xFF;
+                break;
+            case 2:
+                hex = hex & 0xFFFF;
+                break;
+            case 4:
+                hex = hex & 0xFFFFFFFF;
+                break;
+            default:
+                break;
         }
 
         resultString = Integer.toHexString(hex);

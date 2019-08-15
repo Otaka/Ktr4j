@@ -28,7 +28,7 @@ public class Configuration {
     private static final Logger logger = LoggerFactory.getLogger(Configuration.class.getName());
 
     public Configuration() {
-        File configFile = new File("./configuration.properties");
+        /*File configFile = new File("./configuration.properties");
         if (!configFile.exists()) {
             File configFile2 = new File("../configuration.properties");
             if (!configFile2.exists()) {
@@ -36,13 +36,17 @@ public class Configuration {
             }
 
             configFile = configFile2;
-        }
+        }*/
 
-        load(configFile);
+        //load(configFile);
     }
 
     public Configuration(File configurationFile) {
         load(configurationFile);
+    }
+
+    public Properties getProperties() {
+        return properties;
     }
 
     private void load(File configurationFile) {
