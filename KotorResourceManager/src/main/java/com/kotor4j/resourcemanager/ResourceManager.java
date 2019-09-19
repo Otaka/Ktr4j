@@ -75,6 +75,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
@@ -101,6 +102,9 @@ public class ResourceManager {
     private String currentModule;
     private File modulesFolder;
     private File rimsFolder;
+    private Map<String, Map<ResourceType, ResourceRef>> keyToResourceRefMap = new HashMap<>();
+    private String currentTexturePack = "swpc_tex_tpa";
+    
 
     public ResourceManager() {
         this.configuration = new Configuration();
@@ -111,6 +115,16 @@ public class ResourceManager {
             extensionToResourceTypeMap.put(rt.getExtension().toLowerCase(), rt);
         }
     }
+    
+    public List<String>serchResourcesByPrefix(String prefix){
+        List<String>result=new ArrayList<>();
+        for(String key:keyToResourceRefMap.keySet()){
+            if(key.startsWith(prefix)){
+                result.add(key);
+            }
+        }
+        return result;
+    }
 
     public Configuration getConfiguration() {
         return configuration;
@@ -119,8 +133,7 @@ public class ResourceManager {
     public static Context loadContext(boolean readAllModules) throws IOException {
         ResourceManager resourceManager = new ResourceManager();
         logger.info("Reading resources");
-        resourceManager.scanWholeResourcesList(readAllModules);
-        logger.info("Finished reading resources");
+
         return new Context(resourceManager, resourceManager.getConfiguration());
     }
 
@@ -152,6 +165,7 @@ public class ResourceManager {
         readBiffs(gameFolder, chitinKey);
         addTlkFile(gameFolder);
         readErf();
+        readRims();
         if (readAllModules) {
             readModules();
         }
@@ -160,17 +174,101 @@ public class ResourceManager {
 
     public void setCurrentModule(String moduleName) {
         currentModule = moduleName;
-        logger.debug("Read header from module " + currentModule + ".rim");
-        File moduleFile = new File(modulesFolder, currentModule + ".rim");
-        if (!moduleFile.exists()) {
-            throw new IllegalArgumentException("Cannot find module file [" + moduleFile.getAbsolutePath() + "]");
+        if (!fileToResourceMap.containsKey(moduleName)) {
+            logger.debug("Read header from module " + currentModule + ".rim");
+            File moduleFile = new File(modulesFolder, currentModule + ".rim");
+            if (!moduleFile.exists()) {
+                throw new IllegalArgumentException("Cannot find module file [" + moduleFile.getAbsolutePath() + "]");
+            }
+
+            try (FileInputStream inputStream = new FileInputStream(moduleFile)) {
+                Rim rimArchive = new FileReaderRim().loadFile(inputStream, moduleFile);
+                processParsedRimArchive(rimArchive, "module");
+            } catch (IOException ex) {
+                throw new RuntimeException("Error while parsing module file [" + moduleFile.getAbsolutePath() + "]", ex);
+            }
         }
 
-        try (FileInputStream inputStream = new FileInputStream(moduleFile)) {
-            Rim rimArchive = new FileReaderRim().loadFile(inputStream, moduleFile);
-            processParsedRimArchive(rimArchive, "module");
-        } catch (IOException ex) {
-            throw new RuntimeException("Error while parsing module file [" + moduleFile.getAbsolutePath() + "]", ex);
+        if (!fileToResourceMap.containsKey(moduleName + "_s")) {
+            logger.debug("Read header from module " + currentModule + "_s.rim");
+            File moduleFile = new File(modulesFolder, currentModule + "_s.rim");
+            if (!moduleFile.exists()) {
+                throw new IllegalArgumentException("Cannot find module file [" + moduleFile.getAbsolutePath() + "]");
+            }
+
+            try (FileInputStream inputStream = new FileInputStream(moduleFile)) {
+                Rim rimArchive = new FileReaderRim().loadFile(inputStream, moduleFile);
+                processParsedRimArchive(rimArchive, "module");
+            } catch (IOException ex) {
+                throw new RuntimeException("Error while parsing module file [" + moduleFile.getAbsolutePath() + "]", ex);
+            }
+        }
+
+    }
+
+    public void reconstructResourceMap() {
+        keyToResourceRefMap = new HashMap<>();
+        fillResRefMapFromArchive("global");
+        fillResRefMapFromArchive("globaldx");
+        fillResRefMapFromArchive("miniglobal");
+        fillResRefMapFromArchive("miniglobaldx");
+        fillResRefMapFromArchive("chargen");
+        fillResRefMapFromArchive("chargendx");
+        fillResRefMapFromArchive("mainmenu");
+        fillResRefMapFromArchive("mainmenudx");
+        fillResRefMapFromArchive(currentTexturePack);
+        fillResRefMapFromArchive("swpc_tex_gui");
+        fillResRefMapFromArchive("_newbif");
+        fillResRefMapFromArchive("2da");
+        fillResRefMapFromArchive("gui");
+        fillResRefMapFromArchive("items");
+        fillResRefMapFromArchive("layouts");
+        fillResRefMapFromArchive("legacy");
+        fillResRefMapFromArchive("lightmaps");
+        fillResRefMapFromArchive("lightmaps2");
+        fillResRefMapFromArchive("lightmaps3");
+        fillResRefMapFromArchive("lightmaps4");
+        fillResRefMapFromArchive("lightmaps5");
+        fillResRefMapFromArchive("lightmaps6");
+        fillResRefMapFromArchive("lightmaps7");
+        fillResRefMapFromArchive("lightmaps8");
+        fillResRefMapFromArchive("lightmaps9");
+        fillResRefMapFromArchive("lightmaps10");
+        fillResRefMapFromArchive("lightmaps11");
+        fillResRefMapFromArchive("lightmaps12");
+        fillResRefMapFromArchive("lightmaps13");
+        fillResRefMapFromArchive("models");
+        fillResRefMapFromArchive("party");
+        fillResRefMapFromArchive("player");
+        fillResRefMapFromArchive("scripts");
+        fillResRefMapFromArchive("sounds");
+        fillResRefMapFromArchive("templates");
+        fillResRefMapFromArchive("textures");
+
+        if (currentModule != null) {
+            fillResRefMapFromArchive(currentModule);
+            fillResRefMapFromArchive(currentModule + "_s");
+        }
+        fillResRefMapFromArchive("override");
+    }
+
+    private void fillResRefMapFromArchive(String archiveName) {
+        if (!fileToResourceMap.containsKey(archiveName)) {
+            throw new IllegalArgumentException("Cannot find archive [" + archiveName + "]");
+        }
+        ResourceType2ResourceListPair rtp = fileToResourceMap.get(archiveName);
+
+        for (ResourceType rt : rtp.getResourceTypes()) {
+            List<ResourceRef>resourceForType=rtp.getResourcesForType(rt);
+            for (int i=0;i<resourceForType.size();i++) {
+                ResourceRef ref =resourceForType.get(i);
+                Map<ResourceType, ResourceRef> typeMap = keyToResourceRefMap.get(ref.getName());
+                if (typeMap == null) {
+                    typeMap = new HashMap<>();
+                    keyToResourceRefMap.put(ref.getName().toLowerCase(), typeMap);
+                }
+                typeMap.put(rt, ref);
+            }
         }
     }
 
@@ -293,6 +391,9 @@ public class ResourceManager {
             }
         }
 
+    }
+
+    private void readRims() {
         for (File supportRimFile : rimsFolder.listFiles((FilenameFilter) new WildcardFileFilter("*.rim"))) {
             logger.debug("Read header from rim " + supportRimFile.getName());
             try (FileInputStream inputStream = new FileInputStream(supportRimFile)) {
@@ -395,9 +496,28 @@ public class ResourceManager {
             return new NwnByteArrayInputStream(buffer);
         }
     }
+    
+    public Tlk getTlk(){
+        if(cachedTlkFile==null){
+            ResourceType2ResourceListPair resourceType2ResourceListPair=fileToResourceMap.get("talkfile");
+            if(resourceType2ResourceListPair==null||resourceType2ResourceListPair.getResourceTypes().contains(ResourceType.TLK)==false){
+                throw new IllegalStateException("Something wrong. Cannot find dialog.tlk file");
+            }
+            try {
+                getConvertedResource(resourceType2ResourceListPair.getResourcesForType(ResourceType.TLK).get(0));
+            } catch (IOException ex) {
+                throw new RuntimeException("Error while read dialog.tlk file",ex);
+            }
+        }
+        return cachedTlkFile;
+    }
 
     public Object getConvertedResource(ResourceRef resourceRef) throws IOException {
         return getConvertedResource(resourceRef, false);
+    }
+
+    public Map<ResourceType, ResourceRef> getResourceRefByName(String name) {
+        return keyToResourceRefMap.get(name);
     }
 
     public Object getConvertedResource(ResourceRef resourceRef, boolean mdlAsText) throws IOException {
@@ -537,4 +657,38 @@ public class ResourceManager {
                 throw new IllegalStateException("Unknown GFF resource object [" + resRef.getResourceType() + "]");
         }
     }
+
+    public String getCurrentModule() {
+        return currentModule;
+    }
+
+    /**
+     * Expects file path and returns null in case if file is not found<br/>
+     * Can contain placeholder {game.folder} to actual game folder path without
+     * /
+     */
+    public File getGameFile(String path) {
+        if (path.contains("{game.folder}")) {
+            path = path.replace("{game.folder}", gameFolder.getAbsolutePath());
+        }
+        File f = new File(path);
+        if (!f.exists()) {
+            return null;
+        }
+        return f;
+    }
+
+    /**
+     * Expects file path and returns null in case if file is not found<br/>
+     * Can contain placeholder {game.folder} to actual game folder path that
+     * ends with /
+     */
+    public File getGameFileThrowErrorIfNotExists(String path) {
+        File f = getGameFile(path);
+        if (f == null) {
+            throw new IllegalArgumentException("Cannot find file [" + path + "]");
+        }
+        return f;
+    }
+
 }

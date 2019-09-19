@@ -68,6 +68,7 @@ public class ResourceManagerMain {
         }
 
         Context context = ResourceManager.loadContext(true);
+        context.getResourceManager().scanWholeResourcesList(true);
         if (printBundles) {
             printBundles(context.getResourceManager());
         }

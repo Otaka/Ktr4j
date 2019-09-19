@@ -6,12 +6,48 @@
     <version>0.1</version>
     <packaging>pom</packaging>
     <modules>
+        <module>MathLayout</module>
+        <module>AssImp4J</module>
+        <module>JMonkeySimpleGeometryLoader</module>
+        <module>JMDynamicFont</module>
         <module>KotorCommons</module>
-        <module>KotorNcsInterpeter</module>
         <module>KotorResourceManager</module>
+        <module>KotorConverter</module>
+        <module>KotorNcsInterpeter</module>
         <module>Ktr4j</module>
+        <module>KotorGui</module>
+        
+        <module>Ktr4jEditor</module>
     </modules>
     <properties>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <jme3_v>3.2.1-stable</jme3_v>
     </properties>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.jmonkeyengine</groupId>
+                <artifactId>jme3-core</artifactId>
+                <version>${jme3_v}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jmonkeyengine</groupId>
+                <artifactId>jme3-desktop</artifactId>
+                <version>${jme3_v}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jmonkeyengine</groupId>
+                <artifactId>jme3-lwjgl</artifactId>
+                <version>${jme3_v}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+    <repositories>
+        <repository>
+            <id>jcenter</id>
+            <url>http://jcenter.bintray.com</url>
+        </repository>
+    </repositories>
 </project>
